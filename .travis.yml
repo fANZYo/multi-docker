@@ -1,0 +1,20 @@
+sudo: required
+services:
+   - docker
+
+before_install:
+   - docker build -f ./client/Dockerfile.dev -t williamiehl/react-test ./client
+
+script:
+  - docker run -e CI=true williamiehl/react-test npm test
+
+after_success:
+   - docker build -t williamiehl/multi-client ./client
+   - docker build -t williamiehl/multi-nginx ./nginx
+   - docker build -t williamiehl/multi-server ./server
+   - docker build -t williamiehl/multi-worker ./worker
+   - docker login -u "$DOCKER_ID" -p "$DOCKER_PASSWORD"
+   - docker push williamiehl/multi-client
+   - docker push williamiehl/multi-nginx
+   - docker push williamiehl/multi-server
+   - docker push williamiehl/multi-worker
